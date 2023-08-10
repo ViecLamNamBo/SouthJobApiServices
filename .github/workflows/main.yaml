@@ -1,0 +1,15 @@
+name : South Job API Services CI
+on: 
+  push : 
+    branches : 
+      - '*',
+      - '*/*'
+jobs : 
+    check-format-code:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Install dependencies
+          run: npm install
+
+        - name: Run lint check
+          run: npm run lint
