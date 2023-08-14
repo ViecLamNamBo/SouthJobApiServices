@@ -1,13 +1,13 @@
-What did you do? (mandatory)
+1.What did you do? (mandatory)
 
-Why would you do that? (mandatory)
+2.Why would you do that? (mandatory)
 
-An explanation about your solution or decision or chose (if needed)
+3.An explanation about your solution or decision or chose (if needed)
 
-Checklist (if needed)
+4.Checklist (if needed)
 
-Action need to do before merge (if needed)
+5.Action need to do before merge (if needed)
 
-Action need to do after merge (if needed)
+6.Action need to do after merge (if needed)
 
-Others note (if needed)
+7.Others note (if needed)
