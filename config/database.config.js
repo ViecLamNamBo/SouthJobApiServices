@@ -1,10 +1,7 @@
-const objectConnection = {
-  host: 'db4free.net',
-  port: 3306,
-  user: 'vieclamnambo',
-  password: '@#LocVaNguyen2023',
-  database: 'vieclamnambo',
-  connectionLimit: 100,
-  multipleStatements: true,
+const connectionObject = {
+  host: 'localhost',
+  user: 'username',
+  password: 'password',
+  database: 'mydb',
 };
-module.export = objectConnection;
+module.exports = connectionObject;
