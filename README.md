@@ -1,13 +1,14 @@
 # SouthJobApiService
 
 - Guidelines for Committing Code
+  
   1: Code Commenting: Before committing any changes, ensure that you have thoroughly commented on the code to provide a comprehensive explanation of its functionality.
 
   2: Commit Message Structure: The commit message should adhere to the following structure :
   <type>[optional scope]: <description>
   [optional body]
   [optional footer(s)]
-  For more details, refer to:
+  For more details, refer to: https://blog.logrocket.com/commitlint-write-more-organized-code/
 
   3: Issue Assignment: Make sure to commit changes to the designated issue assigned by the team leader.
 
