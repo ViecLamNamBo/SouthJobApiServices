@@ -48,8 +48,8 @@ app.use(function (req, res, next) {
 app.get('/api', async (req, res, next) => {
   try {
     // get IP
-    const getIpUser = '127.0.0.1';
-    console.log(req.headers['x-forwarded-for'] || req.connection.remoteAddress);
+    // const getIpUser = '127.0.0.1';
+    // console.log(req.headers['x-forwarded-for'] || req.connection.remoteAddress);
     // const numberRequest = await incr(getIpUser);
 
     res.json({
