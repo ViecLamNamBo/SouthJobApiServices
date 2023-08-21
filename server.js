@@ -1,9 +1,10 @@
 require('dotenv').config();
 require('dotenv').config();
-const { PORT } = process.env || 5000;
+const { PORT } = process.env || 8080;
 const express = require('express');
 const morgan = require('morgan');
 const helmet = require('helmet');
+const { incr } = require('./api/V1/models/limiter');
 const app = express();
 const logEvents = require('./api/V1/helpers/logEvents');
 app.use(morgan('short'));
@@ -12,7 +13,7 @@ app.use(helmet());
 //  ToDo:  SETUP CORS
 app.use(function (req, res, next) {
   // Website you wish to allow to connect
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080');
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8000');
 
   // Request methods you wish to allow
   res.setHeader(
@@ -35,23 +36,39 @@ app.use(function (req, res, next) {
 });
 
 // add  body-parser
-app.use(express.json);
-app.use(
-  express.urlencoded({
-    extend: true,
-  })
-);
+// app.use(express.json);
+// app.use(
+//   express.urlencoded({
+//     extend: true,
+//   })
+// );
 
 // router
 
-app.use('/', (req, res, next) => {
-  res.send('This is home page');
-});
+app.get('/api', async (req, res, next) => {
+  try {
+    // get IP
+    const getIpUser = '127.0.0.1';
+    console.log(req.headers['x-forwarded-for'] || req.connection.remoteAddress);
+    // const numberRequest = await incr(getIpUser);
 
+    res.json({
+      status: 'success',
+      // numberRequest: numberRequest,
+      elements: [
+        { id: 1, name: 'locit' },
+        { id: 1, name: 'nguyen' },
+      ],
+    });
+  } catch (err) {
+    // throw new Error(err);
+    console.log(err);
+  }
+});
 // Error handling middleware called
 app.use((req, res, next) => {
   console.log(morgan('short'));
-  logEvents(morgan('short'));
+  // logEvents(morgan('short'));
   res.status(err.status || 500);
   res.json({
     status: err.status || 500,
