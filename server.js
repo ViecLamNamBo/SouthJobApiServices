@@ -1,12 +1,12 @@
 require('dotenv').config();
-require('dotenv').config();
 const { PORT } = process.env || 8080;
 const express = require('express');
 const morgan = require('morgan');
 const helmet = require('helmet');
+const bodyParser = require('body-parser');
 const { incr } = require('./api/V1/models/limiter');
 const app = express();
-const logEvents = require('./api/V1/helpers/logEvents');
+
 app.use(morgan('short'));
 app.use(helmet());
 
@@ -18,7 +18,7 @@ app.use(function (req, res, next) {
   // Request methods you wish to allow
   res.setHeader(
     'Access-Control-Allow-Methods',
-    'GET, POST, OPTIONS, PUT, PATCH, DELETE'
+    'GET, POST, OPTIONS, PUT, PATCH'
   );
 
   // Request headers you wish to allow
@@ -35,23 +35,11 @@ app.use(function (req, res, next) {
   next();
 });
 
-// add  body-parser
-// app.use(express.json);
-// app.use(
-//   express.urlencoded({
-//     extend: true,
-//   })
-// );
-
-// router
-
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+// Use the router in your main application
 app.get('/api', async (req, res, next) => {
   try {
-    // get IP
-    // const getIpUser = '127.0.0.1';
-    // console.log(req.headers['x-forwarded-for'] || req.connection.remoteAddress);
-    // const numberRequest = await incr(getIpUser);
-
     res.json({
       status: 'success',
       // numberRequest: numberRequest,
@@ -65,15 +53,19 @@ app.get('/api', async (req, res, next) => {
     console.log(err);
   }
 });
+// config body bodyParser
+app.use(
+  bodyParser.urlencoded({
+    limit: '1000kb',
+    parameterLimit: 1000000,
+    extended: true,
+  })
+);
 // Error handling middleware called
 app.use((req, res, next) => {
-  console.log(morgan('short'));
-  // logEvents(morgan('short'));
-  res.status(err.status || 500);
-  res.json({
-    status: err.status || 500,
-    message: err.message,
-  });
+  const err = new Error('This route dose not exit');
+  err.status = 500;
+  next(err);
 });
 
 // error handler middleware
