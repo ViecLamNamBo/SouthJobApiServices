@@ -6,9 +6,7 @@ const authMiddleware = (req, res, next) => {
   if (!accessToken) {
     return res
       .status(403)
-      .json(
-        responseMessage('You are not authenticated.', null, 'Faild.', null)
-      );
+      .json(responseMessage('You are not authenticated.', null, 'Fail.', null));
   }
   jwt.verify(
     accessToken,
@@ -17,7 +15,7 @@ const authMiddleware = (req, res, next) => {
       if (err) {
         return res
           .status(403)
-          .json(responseMessage('Token is not valid!', null, 'Faild!', null));
+          .json(responseMessage('Token is not valid!', null, 'Fail!', null));
       }
       return res
         .status(404)
