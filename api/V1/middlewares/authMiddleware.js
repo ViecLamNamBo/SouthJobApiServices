@@ -1,27 +1,36 @@
 const jwt = require('jsonwebtoken');
+const responseMessage = require('../helpers/responseMessage');
 
 const authMiddleware = (req, res, next) => {
   const accessToken = req.header.token.split(' ')[1]; // get token from  req heder of  user
   if (!accessToken) {
-    return res.status(404).json({
-      message: 'Token is  invalid!',
-    });
+    return res
+      .status(403)
+      .json(
+        responseMessage('You are not authenticated.', null, 'Faild.', null)
+      );
   }
   jwt.verify(
     accessToken,
     process.env.ACCESS_TOKEN_SECRET,
     function checkAuthentication(err, user) {
       if (err) {
-        return res.status(404).json({
-          message: 'The user are not authentication!',
-        });
+        return res
+          .status(403)
+          .json(responseMessage('Token is not valid!', null, 'Faild!', null));
       }
-      return res.status(200).json({
-        message: 'Authentication successfully!',
-        user,
-      });
+      return res
+        .status(404)
+        .json(
+          responseMessage(
+            'Authentication successfully!',
+            user,
+            'Successfully!',
+            null
+          )
+        );
     }
   );
   return next();
 };
-export default authMiddleware;
+module.exports = authMiddleware;

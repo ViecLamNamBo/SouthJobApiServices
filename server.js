@@ -1,58 +1,23 @@
 require('dotenv').config();
-const { PORT } = process.env || 8080;
 const express = require('express');
 const morgan = require('morgan');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
-const { incr } = require('./api/V1/models/limiter');
+const cookieParser = require('cookie-parser');
+const cors = require('cors');
 const app = express();
+const { PORT } = process.env || 8080;
+const userRoute = require('./api/v1/User/user.router');
 
 app.use(morgan('short'));
 app.use(helmet());
-
-//  ToDo:  SETUP CORS
-app.use(function (req, res, next) {
-  // Website you wish to allow to connect
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8000');
-
-  // Request methods you wish to allow
-  res.setHeader(
-    'Access-Control-Allow-Methods',
-    'GET, POST, OPTIONS, PUT, PATCH'
-  );
-
-  // Request headers you wish to allow
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-Requested-With,content-type'
-  );
-
-  // Set to true if you need the website to include cookies in the requests sent
-  // to the API (e.g. in case you use sessions)
-  res.setHeader('Access-Control-Allow-Credentials', true);
-
-  // Pass to next layer of middleware
-  next();
-});
-
+app.use(cors());
+app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-// Use the router in your main application
-app.get('/api', async (req, res, next) => {
-  try {
-    res.json({
-      status: 'success',
-      // numberRequest: numberRequest,
-      elements: [
-        { id: 1, name: 'locit' },
-        { id: 1, name: 'nguyen' },
-      ],
-    });
-  } catch (err) {
-    // throw new Error(err);
-    console.log(err);
-  }
-});
+
+// set up url to call api
+app.use('/api/v1/candidate/', userRoute);
 // config body bodyParser
 app.use(
   bodyParser.urlencoded({
@@ -77,7 +42,6 @@ app.use((error, req, res, next) => {
     },
   });
 });
-
-const server = app.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`Server start with port ${PORT}`);
 });

@@ -22,8 +22,10 @@
   },
   "homepage": "https://github.com/ViecLamNamBo/SouthJobApiServices#readme",
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
     "compression": "^1.7.4",
+    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "discord.js": "^14.13.0",
     "dotenv": "^16.3.1",
