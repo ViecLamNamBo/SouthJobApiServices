@@ -1,9 +1,9 @@
 const jwt = require('jsonwebtoken');
 const responseMessage = require('../helpers/responseMessage');
 
-const authMiddleware = (req, res, next) => {
+const authMiddleware = async (req, res, next) => {
   // const accessToken = req.header.token.split(' ')[1]; // get token from  req heder of  user
-  const accessToken = req.header.token;
+  const accessToken = await req.header.token;
   console.log(
     '🚀 ~ file: authMiddleware.js:6 ~ authMiddleware ~ accessToken:',
     accessToken

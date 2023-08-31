@@ -1,14 +1,14 @@
 const mysql = require('mysql');
-require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const objectConnection = require('../../../configs/database.config');
+const responseMessage = require('../helpers/responseMessage');
 const {
   hashPassword,
   generateAccessToken,
   generateRefreshToken,
 } = require('../helpers/authHelper');
-const responseMessage = require('../helpers/responseMessage');
+require('dotenv').config();
 
 // REGISTER FOR USER
 const registerUser = async (req, res) => {
