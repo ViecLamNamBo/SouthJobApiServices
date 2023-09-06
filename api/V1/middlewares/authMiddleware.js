@@ -2,38 +2,38 @@ const jwt = require('jsonwebtoken');
 const responseMessage = require('../helpers/responseMessage');
 
 const authMiddleware = async (req, res, next) => {
-  // const accessToken = req.header.token.split(' ')[1]; // get token from  req heder of  user
-  const accessToken = await req.header.token;
-  console.log(
-    '🚀 ~ file: authMiddleware.js:6 ~ authMiddleware ~ accessToken:',
-    accessToken
-  );
+  const accessToken = req.headers.token.split(' ')[1]; // get token from  req heder of  user
+  // const accessToken = await req.headers['token'];
   if (!accessToken) {
     return res
       .status(403)
-      .json(responseMessage('You are not authenticated.', null, 'Fail.', null));
+      .json(responseMessage('No token provided.', null, 'Fail.', null));
   }
+  //  verifies secret and  checks exp
   jwt.verify(
     accessToken,
     process.env.ACCESS_TOKEN_SECRET,
     function checkAuthentication(err, user) {
       if (err) {
         return res
-          .status(403)
-          .json(responseMessage('Token is not valid!', null, 'Fail!', null));
+          .status(401)
+          .json(responseMessage('Unauthorized access !', null, 'Fail!', null));
       }
-      return res
-        .status(404)
-        .json(
-          responseMessage(
-            'Authentication successfully!',
-            user,
-            'Successfully!',
-            null
-          )
-        );
+      // return res
+      //   .status(200)
+      //   .json(
+      //     responseMessage(
+      //       'Authentication successfully!',
+      //       user,
+      //       'Successfully!',
+      //       null
+      //     )
+      //   );
+      req.user = user;
+      next();
+      return null;
     }
   );
-  return next();
+  return null;
 };
 module.exports = authMiddleware;

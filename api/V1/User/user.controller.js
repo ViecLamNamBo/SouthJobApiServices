@@ -86,17 +86,12 @@ const loginUser = async (req, res) => {
             path: '/',
             sameSite: 'strict',
           });
-          const { password, ...otherInformation } = candidateInformation[0];
-          return res
-            .status(200)
-            .json(
-              responseMessage(
-                'Đăng nhập thành công!',
-                otherInformation,
-                'Success.',
-                { accessToken }
-              )
-            );
+          // const { password, ...otherInformation } = candidateInformation[0];
+          return res.status(200).json(
+            responseMessage('Đăng nhập thành công!', null, 'Success.', {
+              accessToken,
+            })
+          );
         }
         return null;
       }
@@ -119,14 +114,16 @@ const requestRefreshToken = async (req, res) => {
   }
   jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECERET, (err, user) => {
     if (err) {
-      console.log(
-        '🚀 ~ file: user.controller.js:123 ~ requestRefreshToken ~ err:',
-        err
-      );
+      return res
+        .status(403)
+        .json(
+          responseMessage('You are not authenticated !', null, 'Fail', null)
+        );
     }
     // Create new accessToken and refreshToken
     const newAccessToken = generateAccessToken(user);
     const newRefreshToken = generateRefreshToken(user);
+    // Save refresh token  into cookie
     res.cookie('refreshToken', newRefreshToken, {
       httpOnly: true,
       secure: false,
@@ -143,6 +140,7 @@ const requestRefreshToken = async (req, res) => {
           null
         )
       );
+    return null;
   });
   return null;
 };
