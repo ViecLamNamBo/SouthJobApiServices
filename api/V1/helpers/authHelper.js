@@ -10,7 +10,7 @@ const generateAccessToken = (data) => {
 
 // The function using to generate a  new refresh token
 const generateRefreshToken = (data) => {
-  const refreshToken = jwt.sign({ data }, process.env.REFRESH_TOKEN_SECERET, {
+  const refreshToken = jwt.sign({ data }, process.env.REFRESH_TOKEN_SECRET, {
     expiresIn: '2h',
   });
   return refreshToken;
