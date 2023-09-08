@@ -61,7 +61,13 @@ passport.use(
       callbackURL: process.env.GOOGLE_CALLBACK,
       passReqToCallback: true,
     },
-    function (req, accessToken, refreshToken, profile, done) {
+    function handleLoginWithGoogle(
+      req,
+      accessToken,
+      refreshToken,
+      profile,
+      done
+    ) {
       const userGoogleProfile = {
         email: profile.email,
         full_name: profile.displayName,

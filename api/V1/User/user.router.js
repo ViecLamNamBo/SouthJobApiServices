@@ -1,6 +1,7 @@
 const express = require('express');
 const passport = require('passport');
 const authMiddleware = require('../middlewares/authMiddleware');
+const client = require('../helpers/connection_redis');
 
 const router = express.Router();
 const {
@@ -21,7 +22,8 @@ require('../middlewares/passportMiddleware');
 
 router.route('/register').post(registerUser);
 router.route('/login').post(loginUser);
-
+router.route('/refresh').post(requestRefreshToken);
+router.route('/logout').post(authMiddleware, logoutUser);
 router.route('/login/google').get(
   passport.authenticate('google', {
     session: false,
@@ -33,28 +35,19 @@ router.route('/login/google/callback').get(
     session: false,
     failureRedirect: '/failed',
   }),
-  function (req, res) {
+  (req, res) => {
     const userInfo = req.user;
     const accessToken = generateAccessToken(userInfo);
     const refreshToken = generateRefreshToken(userInfo);
-    res
-      .cookie('refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: false,
-        path: '/',
-        sameSite: 'strict',
-      })
-      .cookie('accessToken', accessToken, {
-        httpOnly: true,
-        secure: false,
-        path: '/',
-        sameSite: 'strict',
-      });
+    client.set(userInfo.email, refreshToken, 'ex', 365 * 24 * 60 * 60);
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: false,
+      path: '/',
+      sameSite: 'strict',
+    });
     res.redirect('http://localhost:8080');
   }
 );
-
-router.route('/refresh').post(requestRefreshToken);
-router.route('/logout').post(authMiddleware, logoutUser);
 
 module.exports = router;

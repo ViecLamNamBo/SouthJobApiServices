@@ -15,20 +15,17 @@ const authMiddleware = async (req, res, next) => {
     process.env.ACCESS_TOKEN_SECRET,
     function checkAuthentication(err, user) {
       if (err) {
+        if (err.name === 'JsonWebTokenError') {
+          return res
+            .status(401)
+            .json(
+              responseMessage('Unauthorized access !', null, 'Fail!', null)
+            );
+        }
         return res
           .status(401)
-          .json(responseMessage('Unauthorized access !', null, 'Fail!', null));
+          .json(responseMessage(err.message, null, 'Fail.', null));
       }
-      // return res
-      //   .status(200)
-      //   .json(
-      //     responseMessage(
-      //       'Authentication successfully!',
-      //       user,
-      //       'Successfully!',
-      //       null
-      //     )
-      //   );
       req.user = user;
       next();
       return null;
