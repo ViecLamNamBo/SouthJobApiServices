@@ -1,5 +1,4 @@
 const mysql = require('mysql');
-const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const objectConnection = require('../../../configs/database.config');
 const client = require('../helpers/connection_redis');
@@ -8,9 +7,24 @@ const {
   hashPassword,
   generateAccessToken,
   generateRefreshToken,
+  verifyRefreshToken,
 } = require('../helpers/authHelper');
 require('dotenv').config();
 
+const getInfoOfUser = async (req, res) => {
+  return res.status(200).json(
+    responseMessage(
+      'Get Information of user successfully',
+      {
+        username: 'locpham',
+        age: 21,
+        email: 'loc281202@gmail.com',
+      },
+      'success',
+      null
+    )
+  );
+};
 // REGISTER FOR USER
 const registerUser = async (req, res) => {
   try {
@@ -82,19 +96,22 @@ const loginUser = async (req, res) => {
         }
         // valid password and candidate information not empty
         if (candidateInformation && validPassword) {
-          const accessToken = generateAccessToken(candidateInformation[0]);
-          const refreshToken = generateRefreshToken(candidateInformation[0]);
-          client.set(candidateInformation[0].email.toString(), refreshToken, {
-            EX: 8 * 24 * 60 * 60,
-          });
+          const accessToken = generateAccessToken(
+            candidateInformation[0].candidate_id
+          );
+          const refreshToken = await generateRefreshToken(
+            candidateInformation[0].candidate_id
+          );
           res
             .cookie('refreshToken', refreshToken, {
+              maxAge: 7 * 24 * 60 * 1000, // 7 days
               httpOnly: true,
               secure: false,
               path: '/',
               sameSite: 'strict',
             })
             .cookie('accessToken', accessToken, {
+              maxAge: 2 * 60 * 60 * 1000, // 2 hour
               httpOnly: true,
               secure: false,
               path: '/',
@@ -102,15 +119,21 @@ const loginUser = async (req, res) => {
             });
           // const { password, ...otherInformation } = candidateInformation[0];
           return res.status(200).json(
-            responseMessage('Đăng nhập thành công!', null, 'Success.', {
-              accessToken,
-            })
+            responseMessage(
+              'Đăng nhập thành công!',
+              {
+                accessToken,
+              },
+              'Success.',
+              null
+            )
           );
         }
         return null;
       }
     );
   } catch (err) {
+    console.log('🚀 ~ file: user.controller.js:119 ~ loginUser ~ err:', err);
     return res
       .status(500)
       .json(responseMessage('Error....', null, 'Error', null));
@@ -119,72 +142,45 @@ const loginUser = async (req, res) => {
 };
 // Refresh token
 const requestRefreshToken = async (req, res) => {
-  // Take refresh token from user
-  const { refreshToken } = req.cookies;
-
-  if (!refreshToken) {
-    return res
-      .status(401)
-      .json(responseMessage('You are not authenticated!', null, 'Fail', null));
-  }
-  jwt.verify(
-    refreshToken,
-    process.env.REFRESH_TOKEN_SECRET,
-    function (err, user) {
-      if (err) {
-        return res
-          .status(403)
-          .json(
-            responseMessage('You are not authenticated !', null, 'Fail', null)
-          );
-      }
-      const userToken = client.get('loc281202@gmail.com').then((token) => {
-        return token;
-      });
-      userToken.then(function (reply) {
-        // if (err) {
-        //   return res
-        //     .status(500)
-        //     .json(responseMessage('Server Error', null, 'Error', null));
-        // }
-        if (refreshToken === reply) {
-          console.log('giong nhau');
-          // Create new accessToken and refreshToken
-          const newAccessToken = generateAccessToken(user);
-          // const newRefreshToken = generateRefreshToken(user);
-          // Save new access  token  into cookie
-          res.cookie('accessToken', newAccessToken, {
-            httpOnly: true,
-            secure: false,
-            path: '/',
-            sameSite: 'strict',
-          });
-          return res
-            .status(200)
-            .json(
-              responseMessage(
-                'Tạo mới accessToken thành công!',
-                { accessToken: newAccessToken },
-                'Success!',
-                null
-              )
-            );
-        }
-        return res
-          .status(401)
-          .json(
-            responseMessage('You are not authenticated!', reply, 'Fail', null)
-          );
-      });
-      return null;
+  try {
+    const { refreshToken } = req.cookies;
+    if (!refreshToken) {
+      return res
+        .status(401)
+        .json(
+          responseMessage('You are not authenticated!', null, 'Fail', null)
+        );
     }
-  );
-  return null;
+    const userId = await verifyRefreshToken(refreshToken);
+    const newAccessToken = generateAccessToken(userId);
+    res.cookie('accessToken', newAccessToken, {
+      httpOnly: true,
+      secure: false,
+      path: '/',
+      sameSite: 'strict',
+    });
+    return res
+      .status(200)
+      .json(
+        responseMessage(
+          'Tạo mới access token thành công !',
+          { accessToken: newAccessToken },
+          'Success',
+          null
+        )
+      );
+  } catch (error) {
+    return res
+      .status(500)
+      .json(responseMessage('Server Error', null, 'Error', null));
+  }
 };
 const logoutUser = async (req, res) => {
   try {
     res.clearCookie('refreshToken');
-    res
+    res.clearCookie('accessToken');
+    await client.del(req.user.data.toString());
+    return res
       .status(200)
       .json(responseMessage('Đăng xuất thành công !', null, 'Success', null));
   } catch (err) {
@@ -192,11 +188,11 @@ const logoutUser = async (req, res) => {
       .status(500)
       .json(responseMessage('Error...', null, 'Error', null));
   }
-  return null;
 };
 module.exports = {
   registerUser,
   loginUser,
   requestRefreshToken,
   logoutUser,
+  getInfoOfUser,
 };

@@ -2,8 +2,8 @@ const jwt = require('jsonwebtoken');
 const responseMessage = require('../helpers/responseMessage');
 
 const authMiddleware = async (req, res, next) => {
-  const accessToken = req.headers.token.split(' ')[1]; // get token from  req heder of  user
-  // const accessToken = await req.headers['token'];
+  // get access token from cookie
+  const { accessToken } = req.cookies;
   if (!accessToken) {
     return res
       .status(403)

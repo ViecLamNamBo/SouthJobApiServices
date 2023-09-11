@@ -14,6 +14,7 @@ const {
   loginUser,
   requestRefreshToken,
   logoutUser,
+  getInfoOfUser,
 } = require('./user.controller');
 require('../middlewares/passportMiddleware');
 
@@ -23,6 +24,7 @@ require('../middlewares/passportMiddleware');
 router.route('/register').post(registerUser);
 router.route('/login').post(loginUser);
 router.route('/refresh').post(requestRefreshToken);
+router.route('/userInfo').get(authMiddleware, getInfoOfUser);
 router.route('/logout').post(authMiddleware, logoutUser);
 router.route('/login/google').get(
   passport.authenticate('google', {
@@ -35,17 +37,27 @@ router.route('/login/google/callback').get(
     session: false,
     failureRedirect: '/failed',
   }),
-  (req, res) => {
+  async (req, res) => {
     const userInfo = req.user;
-    const accessToken = generateAccessToken(userInfo);
-    const refreshToken = generateRefreshToken(userInfo);
-    client.set(userInfo.email, refreshToken, 'ex', 365 * 24 * 60 * 60);
-    res.cookie('accessToken', accessToken, {
-      httpOnly: true,
-      secure: false,
-      path: '/',
-      sameSite: 'strict',
-    });
+    const accessToken = await generateAccessToken(userInfo.candidate_id);
+    const refreshToken = await generateRefreshToken(userInfo.candidate_id);
+    //   res
+    res
+      .cookie('accessToken', accessToken, {
+        maxAge: 2 * 60 * 60 * 1000, // 2 hours
+        httpOnly: true,
+        secure: false,
+        path: '/',
+        sameSite: 'strict',
+      })
+      .cookie('refreshToken', refreshToken, {
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        httpOnly: true,
+        secure: false,
+        path: '/',
+        sameSite: 'strict',
+      });
+
     res.redirect('http://localhost:8080');
   }
 );
