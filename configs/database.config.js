@@ -4,7 +4,8 @@ const objectConnection = {
   user: 'vieclamnambo',
   password: '@#LocVaNguyen2023',
   database: 'vieclamnambo',
-  connectionLimit: 100,
-  multipleStatements: true,
+  connectionLimit: true,
+  multipleStatement: true,
 };
-module.export = objectConnection;
+
+module.exports = objectConnection;

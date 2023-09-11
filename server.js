@@ -1,62 +1,36 @@
 require('dotenv').config();
-require('dotenv').config();
-const { PORT } = process.env || 5000;
 const express = require('express');
 const morgan = require('morgan');
 const helmet = require('helmet');
+const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+const cors = require('cors');
 const app = express();
-const logEvents = require('./api/V1/helpers/logEvents');
+const { PORT } = process.env || 8080;
+const userRoute = require('./api/v1/User/user.router');
+
 app.use(morgan('short'));
 app.use(helmet());
+app.use(cors());
+app.use(cookieParser());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-//  ToDo:  SETUP CORS
-app.use(function (req, res, next) {
-  // Website you wish to allow to connect
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080');
-
-  // Request methods you wish to allow
-  res.setHeader(
-    'Access-Control-Allow-Methods',
-    'GET, POST, OPTIONS, PUT, PATCH, DELETE'
-  );
-
-  // Request headers you wish to allow
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-Requested-With,content-type'
-  );
-
-  // Set to true if you need the website to include cookies in the requests sent
-  // to the API (e.g. in case you use sessions)
-  res.setHeader('Access-Control-Allow-Credentials', true);
-
-  // Pass to next layer of middleware
-  next();
-});
-
-// add  body-parser
-app.use(express.json);
+// set up url to call api
+app.use('/api/v1/candidate/', userRoute);
+// config body bodyParser
 app.use(
-  express.urlencoded({
-    extend: true,
+  bodyParser.urlencoded({
+    limit: '1000kb',
+    parameterLimit: 1000000,
+    extended: true,
   })
 );
-
-// router
-
-app.use('/', (req, res, next) => {
-  res.send('This is home page');
-});
-
 // Error handling middleware called
 app.use((req, res, next) => {
-  console.log(morgan('short'));
-  logEvents(morgan('short'));
-  res.status(err.status || 500);
-  res.json({
-    status: err.status || 500,
-    message: err.message,
-  });
+  const err = new Error('This route dose not exit');
+  err.status = 500;
+  next(err);
 });
 
 // error handler middleware
@@ -68,7 +42,6 @@ app.use((error, req, res, next) => {
     },
   });
 });
-
-const server = app.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`Server start with port ${PORT}`);
 });

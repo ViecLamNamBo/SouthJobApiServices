@@ -30,16 +30,17 @@ class LoggerServices {
         {
           color: parseInt('00ff00', 16),
           title,
-          description: '```json\n' + Json.stringify(code, null, 2) + '\n```',
+          description: '```json\n' + JSON.stringify(code, null, 2) + '\n```',
         },
       ],
     };
     this.sendToMessage(codeMessage);
   }
   sendToMessage(message = 'message') {
-    const channel = this.client.channels.cache.get(this.channelId);
+    const channelId = CHANNEL_ID_DISCORD;
+    const channel = this.client.channels.cache.get(channelId);
     if (!channel) {
-      console.error(`Could't find the channel ...`, this.channelId);
+      console.error(`Could't find the channel ...`, channelId);
       return;
     }
     channel.send(message).catch((e) => console.error(e));
