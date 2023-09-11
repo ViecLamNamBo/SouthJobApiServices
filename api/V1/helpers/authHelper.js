@@ -1,7 +1,6 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const client = require('./connection_redis');
-const responseMessage = require('./responseMessage');
 // The function using to generate a  new access token
 const generateAccessToken = (data) => {
   const accessToken = jwt.sign({ data }, process.env.ACCESS_TOKEN_SECRET, {
@@ -27,19 +26,15 @@ const verifyRefreshToken = async (refreshToken) => {
       process.env.REFRESH_TOKEN_SECRET,
       async (err, payload) => {
         if (err) {
-          console.log('Error verifying refresh token:', err);
           return reject(err);
         }
         try {
           const storedToken = await client.get(payload.data.toString());
           if (refreshToken === storedToken) {
-            console.log('Refresh token verified successfully.');
             return resolve(payload.data);
           }
-          console.log('Refresh token does not match.');
           return reject(new Error('Refresh token does not match'));
         } catch (error) {
-          console.log('Error retrieving stored token:', error);
           return reject(error);
         }
       }

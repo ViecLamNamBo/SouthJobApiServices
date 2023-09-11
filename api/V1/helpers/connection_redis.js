@@ -13,11 +13,11 @@ const client = createClient({
   await client.connect();
 })();
 
-// console.log('Connecting to the Redis');
+console.log('Connecting to the Redis');
 
-// client.on('ready', () => {
-//   console.log('Redis Connected!');
-// });
+client.on('ready', () => {
+  console.log('Redis Connected!');
+});
 
 client.on('error', (err) => {
   console.log('Error in the Connection', err);
