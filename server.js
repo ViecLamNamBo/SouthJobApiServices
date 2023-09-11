@@ -4,11 +4,21 @@ const morgan = require('morgan');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const passport = require('passport');
 const cors = require('cors');
+const session = require('express-session');
 const app = express();
-const { PORT } = process.env || 8080;
+const { PORT } = process.env || 8000;
 const userRoute = require('./api/v1/User/user.router');
-
+app.use(
+  session({
+    secret: 'secretidhere',
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(morgan('short'));
 app.use(helmet());
 app.use(cors());
@@ -35,6 +45,8 @@ app.use((req, res, next) => {
 
 // error handler middleware
 app.use((error, req, res, next) => {
+  console.log('🚀 ~ file: server.js:48 ~ app.use ~ error:', error);
+
   res.status(error.status || 500).send({
     error: {
       status: error.status || 500,
